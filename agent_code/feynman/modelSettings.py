@@ -1,0 +1,2 @@
+GAMMA = .8
+ALPHA = .3
