@@ -62,31 +62,35 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
 
     #calculate state indices
     if(len(old_coins)>0):
-        oldxdist = old_coins[0][0]-old_x
-        oldydist = old_coins[0][1]-old_y
+        old_coindist = old_coins-np.array((old_x,old_y))
+        old_coinindex = np.argmin(np.linalg.norm(old_coindist,axis=1))
+        old_xdist = old_coindist[old_coinindex][0]
+        old_ydist = old_coindist[old_coinindex][1]
     else:
         oldxdist = 0
         oldydist = 0
 
     if(len(new_coins)>0):
-        newxdist = new_coins[0][0]-new_x
-        newydist = new_coins[0][1]-new_y
+        new_coindist = new_coins-np.array((new_x,new_y))
+        new_coinindex = np.argmin(np.linalg.norm(new_coindist,axis=1))
+        new_xdist = new_coindist[new_coinindex][0]
+        new_ydist = new_coindist[new_coinindex][1]
     else:
         newxdist = 0
         newydist = 0
 
-    oldxodd = old_x%2
-    oldyodd = old_y%2
-    newxodd = new_x%2
-    newyodd = new_y%2
+    old_xodd = old_x%2
+    old_yodd = old_y%2
+    new_xodd = new_x%2
+    new_yodd = new_y%2
 
-    if(old_bombs_left): oldbomb = 1
-    else: oldbomb = 0
-    if(new_bombs_left): newbomb = 1
-    else: newbomb = 0
+    if(old_bombs_left): old_bomb = 1
+    else: old_bomb = 0
+    if(new_bombs_left): new_bomb = 1
+    else: new_bomb = 0
 
-    oldstatenumber = ((oldxdist+14)+29*(oldydist+14))+841*oldxodd+2*841*oldyodd + 4*841*oldbomb # row index corresponding to state, 841=29*29 rel states
-    newstatenumber = ((newxdist+14)+29*(newydist+14))+841*newxodd+2*841*newyodd + 4*841*newbomb# row index corresponding to state, 
+    old_statenumber = ((old_xdist+14)+29*(old_ydist+14))+841*old_xodd+2*841*old_yodd + 4*841*old_bomb # row index corresponding to state, 841=29*29 rel states
+    new_statenumber = ((new_xdist+14)+29*(new_ydist+14))+841*new_xodd+2*841*new_yodd + 4*841*new_bomb# row index corresponding to state, 
 
 
     #learn here
@@ -97,12 +101,12 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
     a = ACTIONS.index(self_action) # column index corresponding to action taken in this timestep
 
     #prints for debugging
-    #print(f"action: {self_action}, actionindex: {a}, reward: {r}, old model score: {self.model[oldstatenumber]}, s: {oldstatenumber} ")
-    #print(f"new state: {self.model[newstatenumber,:]}, s: {newstatenumber}")
+    #print(f"action: {self_action}, actionindex: {a}, reward: {r}, old model score: {self.model[old_statenumber]}, s: {old_statenumber} ")
+    #print(f"new state: {self.model[new_statenumber,:]}, s: {new_statenumber}")
 
-    self.model[oldstatenumber,a]+=alpha*(r+gamma*max(self.model[newstatenumber,:])-self.model[oldstatenumber,a]) # Q-learning
+    self.model[old_statenumber,a]+=alpha*(r+gamma*max(self.model[new_statenumber,:])-self.model[old_statenumber,a]) # Q-learning
 
-    #print(f"updated model score: {self.model[oldstatenumber]}")
+    #print(f"updated model score: {self.model[old_statenumber]}")
 
     # Store the model
     with open(existing_model, "wb") as file:

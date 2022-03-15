@@ -61,11 +61,15 @@ def act(self, game_state: dict) -> str:
 
     #calculate state index
     if(len(game_state['coins'])>0):
-        xdist = coins[0][0]-x
-        ydist = coins[0][1]-y
+        #determine which coin is closest to agent
+        coindist = coins-np.array((x,y))
+        coinindex = np.argmin(np.linalg.norm(coindist,axis=1))
+        xdist = coindist[coinindex][0]
+        ydist = coindist[coinindex][1]
     else:
         xdist = 0
         ydist = 0
+        
     xodd = x%2
     yodd = y%2
 
